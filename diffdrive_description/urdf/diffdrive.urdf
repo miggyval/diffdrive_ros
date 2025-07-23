@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robot name="diffdrive_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="1.5" length="0.5"/> <!-- Match OpenCV DIAM -->
+      </geometry>
+      <origin xyz="0 0 0.25"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="body">
+    <visual>
+      <geometry>
+        <box size="1.5 1.5 0.2"/> <!-- Small orientation marker -->
+      </geometry>
+      <origin xyz="0 0 0.3"/>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <link name="indicator">
+    <visual>
+      <geometry>
+        <box size="0.05 0.4 0.01"/> <!-- Small orientation marker -->
+      </geometry>
+      <origin xyz="0 1.3 0.23"/>
+      <material name="yellow">
+        <color rgba="1.0 1.0 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+  <!-- Fixed joint connecting indicator to base_link -->
+  <joint name="body_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="body"/>
+    <origin xyz="0 0 0.3"/>
+  </joint>
+  <joint name="indicator_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="indicator"/>
+    <origin xyz="0 0 0.3"/>
+  </joint>
+</robot>
+
