@@ -22,7 +22,8 @@ setup(
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
-            'simulation_node = diffdrive_simulation.simulation_node:main'
+            'simulation_node = diffdrive_simulation.simulation_node:main',
+            'noisy_odom_node = diffdrive_simulation.noisy_odom_node:main'
         ],
     },
 )

@@ -19,7 +19,8 @@ setup(
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
-            'controller_node = diffdrive_controller.controller_node:main',
+            'remote_controller_node = diffdrive_controller.remote_controller_node:main',
+            'target_follower_node = diffdrive_controller.target_follower_node:main',
         ],
     },
 )
