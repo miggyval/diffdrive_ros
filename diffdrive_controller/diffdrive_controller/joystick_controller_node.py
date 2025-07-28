@@ -6,9 +6,9 @@ from diffdrive_interfaces.msg import WheelSpeeds
 from std_msgs.msg import Bool
 
 
-MAX_SPEED = 2.0
-MAX_REVERSE = 0.5
-MAX_ROTATE = 2.0
+MAX_SPEED = 2.0 * 5
+MAX_REVERSE = 0.5 * 5
+MAX_ROTATE = 2.0 * 3
 LENGTH = 2.0
 LEFT_BUMPER, RIGHT_BUMPER, LEFT_TRIGGER, RIGHT_TRIGGER, BUTTON_X = 9, 10, 4, 5, 3
 

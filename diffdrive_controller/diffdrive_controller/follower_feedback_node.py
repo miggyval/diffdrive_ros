@@ -7,7 +7,7 @@ from diffdrive_interfaces.msg import WheelSpeeds
 import numpy as np
 import math
 
-class TargetFollower(Node):
+class FeedbackTargetFollower(Node):
     def __init__(self):
         super().__init__('target_follower')
         
@@ -90,7 +90,7 @@ class TargetFollower(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = TargetFollower()
+    node = FeedbackTargetFollower()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

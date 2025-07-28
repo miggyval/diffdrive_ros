@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'diffdrive_controller'
+package_name = 'diffdrive_lidar'
 
 setup(
     name=package_name,
@@ -11,17 +11,14 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools', 'pygame', 'numpy'],
+    install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Miguel Marco Valencia',
+    maintainer='valencimm',
     maintainer_email='miguel.valencia@uq.edu.au',
     description='TODO: Package description',
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
-            'joystick_controller_node = diffdrive_controller.joystick_controller_node:main',
-            'keyboard_controller_node = diffdrive_controller.keyboard_controller_node:main',
-            'follower_feedforward_node = diffdrive_controller.follower_feedforward_node:main',
         ],
     },
 )
