@@ -19,6 +19,7 @@ setup(
     license='TODO: License declaration',
     entry_points={
         'console_scripts': [
+            'lidar_node = diffdrive_lidar.lidar_node:main',
         ],
     },
 )

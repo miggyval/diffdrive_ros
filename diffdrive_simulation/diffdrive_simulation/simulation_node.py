@@ -22,7 +22,7 @@ class DiffDriveSim(Node):
         self.x, self.y, self.theta = 0.0, 0.0, 0.0
         self.v_l, self.v_r = 0.0, 0.0
         self.last_time = self.get_clock().now()
-        self.create_timer(0.05, self.update)
+        self.create_timer(0.001, self.update)
         self.reset()
         
     def callback_wheel(self, msg):
@@ -66,20 +66,20 @@ class DiffDriveSim(Node):
         self.pub_odom.publish(odom)
         
         
-        GRID_SIZE = 1000
-        GRID_BORDER_UNK = 10
-        GRID_BORDER_OCC = 20
+        GRID_SIZE = 150
+        GRID_BORDER_UNK = 20
+        GRID_BORDER_OCC = 35
         occ = OccupancyGrid()
         occ.header.stamp = now.to_msg()
         occ.header.frame_id = 'odom'
         occ.info.width = GRID_SIZE
         occ.info.height = GRID_SIZE
-        occ.info.resolution = 0.05
+        occ.info.resolution = 0.25
         occ.info.origin.position.x = -occ.info.resolution * GRID_SIZE / 2
         occ.info.origin.position.y = -occ.info.resolution * GRID_SIZE / 2
         occ_grid = -np.ones((GRID_SIZE, GRID_SIZE), dtype=np.int8)
-        occ_grid[GRID_BORDER_UNK:-GRID_BORDER_UNK, GRID_BORDER_UNK:-GRID_BORDER_UNK] = 100 * np.ones((GRID_SIZE - 2 * GRID_BORDER_UNK, GRID_SIZE - 2 * GRID_BORDER_UNK), dtype=np.int8)
-        occ_grid[GRID_BORDER_OCC:-GRID_BORDER_OCC, GRID_BORDER_OCC:-GRID_BORDER_OCC] = np.zeros((GRID_SIZE - 2 * GRID_BORDER_OCC, GRID_SIZE - 2 * GRID_BORDER_OCC), dtype=np.int8)
+        occ_grid[GRID_BORDER_UNK:-GRID_BORDER_UNK, GRID_BORDER_UNK + 10:-GRID_BORDER_UNK - 10] = 100 * np.ones((GRID_SIZE - 2 * GRID_BORDER_UNK, GRID_SIZE - 2 * (GRID_BORDER_UNK + 10)), dtype=np.int8)
+        occ_grid[GRID_BORDER_OCC:-GRID_BORDER_OCC, GRID_BORDER_OCC + 10:-GRID_BORDER_OCC - 10] = np.zeros((GRID_SIZE - 2 * GRID_BORDER_OCC, GRID_SIZE - 2 * (GRID_BORDER_OCC + 10)), dtype=np.int8)
         occ_reshape = np.reshape(occ_grid, (GRID_SIZE * GRID_SIZE,)).astype(np.int8).tolist()
         occ.data = occ_reshape
         self.pub_map.publish(occ)

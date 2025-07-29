@@ -6,6 +6,7 @@ from geometry_msgs.msg import Twist
 from diffdrive_interfaces.msg import WheelSpeeds
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
+from nav_msgs.msg import OccupancyGrid
 import cv2 as cv
 import numpy as np
 
@@ -25,6 +26,7 @@ class VisualizerNode(Node):
 
         self.create_subscription(Odometry, '/odom', self.odom_callback, 10)
         self.create_subscription(Twist, '/cmd_vel', self.cmd_callback, 10)
+        self.create_subscription(OccupancyGrid, '/map', self.occ_callback, 10)
         self.sub_reset = self.create_subscription(Bool, '/reset_sim', self.callback_reset, 10)
         self.create_subscription(WheelSpeeds, '/wheel_speeds', self.wheel_callback, 10)
 
@@ -44,6 +46,8 @@ class VisualizerNode(Node):
         self.target_zoom_factor = 1.0
         self.current_zoom_factor = 1.0
         self.base_view_size = self.xmax - self.xmin  # initial world width
+        
+        self.grid_data = None
 
 
 
@@ -53,6 +57,13 @@ class VisualizerNode(Node):
 
         self.get_logger().info("Visualizer started")
         self.run()
+
+    def occ_callback(self, msg: OccupancyGrid):
+        self.grid_width = msg.info.width
+        self.grid_height = msg.info.height
+        self.grid_resolution = msg.info.resolution
+        self.grid_data = np.reshape(msg.data, (self.grid_height, self.grid_width))
+        self.origin = msg.info.origin
 
     def callback_reset(self, msg):
         if msg.data:
@@ -158,15 +169,38 @@ class VisualizerNode(Node):
         self.ymax = center_y + half_size
 
 
-    def draw_barrier(self, img):
-        outer_rect = [self.c2p(self.xmin, self.ymax), self.c2p(self.xmax, self.ymin)]
-        inner_rect = [
-            self.c2p(self.xmin + BORDER_MARGIN, self.ymax - BORDER_MARGIN),
-            self.c2p(self.xmax - BORDER_MARGIN, self.ymin + BORDER_MARGIN)
-        ]
-        cv.rectangle(img, outer_rect[0], outer_rect[1], (255, 255, 255), -1)
-        cv.rectangle(img, inner_rect[0], inner_rect[1], (200, 200, 200), -1)
+    def draw_barrier(self, img: np.ndarray):
+        if self.grid_data is None:
+            return img
+
+        # Mask where grid_data > 0 (occupied cells)
+        mask = self.grid_data > 0
+        if not np.any(mask):
+            return img
+
+        # Get i, j indices of occupied cells
+        i_idx, j_idx = np.nonzero(mask)
+
+        # Compute world coordinates for top-left corners
+        x_world = j_idx * self.grid_resolution + self.origin.position.x
+        y_world = i_idx * self.grid_resolution + self.origin.position.y
+
+        # Compute pixel size for each cell
+        cell_w = (self.grid_resolution / (self.xmax - self.xmin)) * img.shape[1]
+        cell_h = (self.grid_resolution / (self.ymax - self.ymin)) * img.shape[0]
+
+        # Compute pixel coordinates for rectangles
+        px_left = ((x_world - self.xmin) / (self.xmax - self.xmin) * img.shape[1]).astype(int)
+        py_top  = ((self.ymax - y_world) / (self.ymax - self.ymin) * img.shape[0]).astype(int)
+
+        # Draw filled squares
+        for x0, y0 in zip(px_left, py_top):
+            x1 = int(x0 + cell_w)
+            y1 = int(y0 - cell_h)
+            cv.rectangle(img, (x0, y0), (x1, y1), (0, 0, 0), -1)  # black cell
+
         return img
+
     
     def draw_grid(self, img, spacing=1.0):
         # compute first/last grid lines at multiples of 'spacing'
@@ -333,10 +367,11 @@ class VisualizerNode(Node):
 
                 
             img = frame.copy()
-            #img = self.draw_barrier(img)
             
             self.apply_zoom(alpha=0.1)
             self.draw_grid(img, spacing=1.0)
+            if self.grid_data is not None:
+                img = self.draw_barrier(img)
             self.draw_trail(img)
             self.draw_robot(img)
             
