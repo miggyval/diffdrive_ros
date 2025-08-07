@@ -47,8 +47,8 @@ class DiffDriveSim(Node):
 
         v = (self.v_l + self.v_r) / 2.0
         omega = (self.v_r - self.v_l) / L
-        self.x += -v * np.sin(self.theta) * dt
-        self.y += v * np.cos(self.theta) * dt
+        self.x += -v * np.sin(self.theta) * dt + np.random.normal(0.0, 0.1) * dt
+        self.y += v * np.cos(self.theta) * dt + np.random.normal(0.0, 0.1) * dt
         self.theta += omega * dt
 
         # Publish odometry
